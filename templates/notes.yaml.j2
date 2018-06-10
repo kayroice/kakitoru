@@ -1,0 +1,21 @@
+- 
+    header: '{{ note['header'] }}'
+{%- if note['comment'] %}
+    comment: '{{ note['comment']}}'
+{%- endif %}
+{%- if note['tags'] %}
+    tags:
+{%-    for tag in note['tags'] %}
+        - {{ tag }}
+{%-    endfor %}
+{%- endif -%}
+{%- if note['urls'] %}
+    urls:
+{%-    for url in note['urls'] %}
+        - {{ url }}
+{%-    endfor %}
+{% endif -%}
+{% if note['content'] %}
+    content: '
+{{ note['content'] }}'
+{% endif %}

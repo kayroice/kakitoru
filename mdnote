@@ -98,7 +98,8 @@ def option_parser():
                                help=optmsgs['contenttype'])
     parser_create.add_argument('-d', '--date', default=None,
                                help=optmsgs['date'])
-    parser_create.add_argument('--dryrun', help=optmsgs['dryrun'], action=st)
+    parser_create.add_argument('-dr', '--dryrun', help=optmsgs['dryrun'],
+                               action=st)
     parser_create.add_argument('--header', default=None, help=optmsgs['header'])
     parser_create.add_argument('-n', '--noprompt', help=optmsgs['noprompt'],
                                action=st)
