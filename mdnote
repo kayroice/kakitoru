@@ -27,11 +27,12 @@ def create_mode(args, logger, nb):
         content = nb.get_input()
     note = nb.note(date=args.date, comment=args.comment, content=content,
                    header=args.header, tags=args.tags, urls=args.urls)
-    if args.print:
-        return print(note)
     notes_file = nb.take_note(notes_file=args.file, note=note,
                               append=args.append, content_type=args.contenttype,
-                              template_file=args.templatefile)
+                              template_file=args.templatefile,
+                              dryrun=args.dryrun)
+    if args.dryrun:
+        print(notes_file)
     if notes_file:
         return 0
     print("Failed to write note to: {}".format(notes_file))
@@ -79,9 +80,10 @@ def option_parser():
         'comment': 'Add comment to note.',
         'contenttype': "Type of Markdown content, defaults to 'text'.",
         'date': 'Date of the note, defaults to current date-time.',
+        'dryrun': 'Print the note to stdout, bypasses writing to note file.',
         'header': "Name of entry's header, defaults to current date-time.",
+        'nodateinheader': 'Do not append the date to the header.',
         'noprompt': 'Do not prompt the user for input.',
-        'print': 'Print the note to stdout, bypasses writing to note file.',
         'tags': 'Add space separated tags to note.',
         'templatefile': 'Use file as Jinja2 template.',
         'urls': 'Add space separated urls to note.',
@@ -96,11 +98,12 @@ def option_parser():
                                help=optmsgs['contenttype'])
     parser_create.add_argument('-d', '--date', default=None,
                                help=optmsgs['date'])
+    parser_create.add_argument('--dryrun', help=optmsgs['dryrun'], action=st)
     parser_create.add_argument('--header', default=None, help=optmsgs['header'])
     parser_create.add_argument('-n', '--noprompt', help=optmsgs['noprompt'],
                                action=st)
-    parser_create.add_argument('-p', '--print', help=optmsgs['print'],
-                               action=st)
+    parser_create.add_argument('-nd', '--nodateinheader',
+                               help=optmsgs['nodateinheader'], action=st)
     parser_create.add_argument('-t', '--tags', nargs='+', help=optmsgs['tags'])
     parser_create.add_argument('-tf', '--templatefile', default=None,
                                help=optmsgs['templatefile'])
@@ -139,7 +142,8 @@ def main():
     )
     args = option_parser()
     nb = notes_base.NotesBase(config_file=args.config,
-                              content_type=args.contenttype)
+                              content_type=args.contenttype,
+                              append_date_to_header=(not args.nodateinheader))
     set_logging(args)
 
     if args.mode == 'create':
