@@ -1,0 +1,152 @@
+#!/usr/bin/env python3
+
+"""
+note - command line util to take notes.
+"""
+
+import argparse
+import logging
+import sys
+
+import notes_base
+
+
+def query_mode(args, logger, nb):
+    """
+    Define query mode here.
+    """
+    pass
+
+def create_mode(args, logger, nb):
+    """
+    Pass in cmdline args for create mode.
+    """
+    if args.noprompt:
+        content = None
+    else:
+        content = nb.get_input()
+    note = nb.note(date=args.date, comment=args.comment, content=content,
+                   header=args.header, tags=args.tags, urls=args.urls)
+    if args.print:
+        return print(note)
+    notes_file = nb.take_note(notes_file=args.file, note=note,
+                              append=args.append, content_type=args.contenttype,
+                              template_file=args.templatefile)
+    if notes_file:
+        return 0
+    print("Failed to write note to: {}".format(notes_file))
+    return 1
+
+def option_parser():
+    """
+    Parse all command line options.
+
+    Returns:
+        Returns the argpase.NameSpace object:
+        https://docs.python.org/3/library/argparse.html#the-namespace-object
+    """
+    optmsgs = {
+        'config': 'Path to notes config file.',
+        'dir': 'Write note to directory, if no file specified use notes.yaml.',
+        'file': 'Write note to file, defaults to notes.yaml.',
+        'git': 'Use git repository at specified dir.',
+        'quiet': 'Suppress output.',
+        'verbose': 'Increase verbosity.',
+    }
+    st = 'store_true'
+    title = 'notes - note taking cli'
+
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument('-c', '--config', default=None, help=optmsgs['config'])
+    parser.add_argument('-d', '--dir', help=optmsgs['dir'])
+    parser.add_argument('-f', '--file', help=optmsgs['file'])
+    parser.add_argument('-g', '--git', help=optmsgs['git'], action=st)
+    parser.add_argument('-q', '--quiet', help=optmsgs['quiet'], action=st)
+    parser.add_argument('-v', '--verbose', help=optmsgs['verbose'], action=st)
+
+    # Set up the sub-command parsers.
+    # https://docs.python.org/dev/library/argparse.html#sub-commands
+    subparsers = parser.add_subparsers(title=title, description="Commands:",
+                                       dest='mode')
+
+    # create mode
+    parser_create = subparsers.add_parser('create')
+
+    optmsgs.update({
+        'append': 'If specified appends to notes file instead of prepending.',
+        'autohashtag': "Automatically prepends a '#' to tags.",
+        'comment': 'Add comment to note.',
+        'contenttype': "Type of Markdown content, defaults to 'text'.",
+        'date': 'Date of the note, defaults to current date-time.',
+        'header': "Name of entry's header, defaults to current date-time.",
+        'noprompt': 'Do not prompt the user for input.',
+        'print': 'Print the note to stdout, bypasses writing to note file.',
+        'tags': 'Add space separated tags to note.',
+        'templatefile': 'Use file as Jinja2 template.',
+        'urls': 'Add space separated urls to note.',
+    })
+    parser_create.add_argument('-a', '--append', help=optmsgs['append'],
+                               action=st)
+    parser_create.add_argument('-ah', '--autohashtag',
+                               help=optmsgs['autohashtag'], action=st)
+    parser_create.add_argument('-c', '--comment', default=None,
+                               help=optmsgs['comment'])
+    parser_create.add_argument('-ct', '--contenttype', default='text',
+                               help=optmsgs['contenttype'])
+    parser_create.add_argument('-d', '--date', default=None,
+                               help=optmsgs['date'])
+    parser_create.add_argument('--header', default=None, help=optmsgs['header'])
+    parser_create.add_argument('-n', '--noprompt', help=optmsgs['noprompt'],
+                               action=st)
+    parser_create.add_argument('-p', '--print', help=optmsgs['print'],
+                               action=st)
+    parser_create.add_argument('-t', '--tags', nargs='+', help=optmsgs['tags'])
+    parser_create.add_argument('-tf', '--templatefile', default=None,
+                               help=optmsgs['templatefile'])
+    parser_create.add_argument('-u', '--urls', nargs='+', help=optmsgs['urls'])
+
+    # query mode
+    parser_query = subparsers.add_parser('query')
+
+    optmsgs.update({
+        'date': 'Get note by date.',
+        'tags': 'Get note(s) by tag(s); a single tag can be provided.',
+    })
+    parser_query.add_argument('-d', '--date', help=optmsgs['date'])
+    parser_query.add_argument('-t', '--tags', help=optmsgs['tags'])
+
+    return parser.parse_args()
+
+
+def set_logging(args):
+    """
+    Set the logging level. Defaults to INFO.
+    """
+    logger = logging.getLogger()
+    if args.verbose:
+        logger.setLevel(logging.DEBUG)
+    elif args.quiet:
+        logger.setLevel(logging.WARNING)
+    else:
+        logger.setLevel(logging.INFO)
+
+
+def main():
+    logger = logging.getLogger()
+    logging.basicConfig(
+        format="%(asctime)-15s\t%(levelname)s\t%(funcName)s\t%(message)s"
+    )
+    args = option_parser()
+    nb = notes_base.NotesBase(config_file=args.config,
+                              content_type=args.contenttype)
+    set_logging(args)
+
+    if args.mode == 'create':
+        return create_mode(args, logger, nb)
+
+    if args.mode == 'query':
+        return query_mode(args, logger, nb)
+
+if __name__ == '__main__':
+    sys.exit(main())

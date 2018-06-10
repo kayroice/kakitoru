@@ -1,0 +1,27 @@
+# {{ note['header'] }}
+------------------------------
+
+{% if note['comment'] -%}
+* `comment:` {{ note['comment']}}
+{% endif -%}
+{% if note['tags'] -%}
+* `tags:` {{ note['tags']|join(' ') }}
+{% endif -%}
+{% if note['urls'] -%}
+* `urls:`
+{%-    for url in note['urls'] %}
+    * [{{url}}]({{url}})
+{%-    endfor %}
+{%- endif %}
+
+{% if note['content'] -%}
+{%     if content_type -%}
+```{{ content_type }}
+{%     else -%}
+```
+{%     endif -%}
+{{ note['content']}}
+```
+{%- endif %}
+
+
