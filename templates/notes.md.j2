@@ -12,9 +12,8 @@
 {%-    for url in note['urls'] %}
     * [{{url}}]({{url}})
 {%-    endfor %}
-{%- endif -%}
-
-{% if note['content'] -%}
+{% endif -%}
+{% if note['content'] %}
 {%     if content_type -%}
 ```{{ content_type }}
 {%     else -%}
@@ -22,6 +21,4 @@
 {%     endif -%}
 {{ note['content']}}
 ```
-{%- endif %}
-
-
+{% endif %}

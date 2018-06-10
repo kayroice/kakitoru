@@ -1,0 +1,15 @@
+# {{ note['header'] }}
+{% if note['comment'] -%}
+# Comment: {{ note['comment']}}
+{% endif -%}
+{% if note['tags'] -%}
+# Tags: {{ note['tags']|join(' ') }}
+{% endif -%}
+{% if note['urls'] -%}
+# URLs: {{ note['urls']|join(' ') }}
+{% endif -%}
+------------------------------
+{% if note['content'] -%}
+
+{{ note['content'] }}
+{%- endif %}
