@@ -113,7 +113,7 @@ class NotesBase(object):
             raise NotesErr(msg)
 
     @staticmethod
-    def current_datetime(tz=None):
+    def current_datetime(timezone=None):
         """
         Get a datetime object for the current time (now). See:
         https://docs.python.org/3/library/datetime.html
@@ -124,8 +124,8 @@ class NotesBase(object):
         Returns:
             Returns a datetime object for the current time.
         """
-        tz = tz or 'US/Pacific'
-        pst = pytz.timezone(tz)
+        timezone = timezone or 'US/Pacific'
+        pst = pytz.timezone(timezone)
         return datetime.datetime.now(pst)
 
     @staticmethod
@@ -167,7 +167,7 @@ class NotesBase(object):
             configs.update({key: value})
         logging.debug("Configs defined as: {}".format(configs))
         return configs
-        
+
     def get_date(self):
         """
         Converts the current datetime object into a string and returns a string.
@@ -287,26 +287,30 @@ class NotesBase(object):
             Returns a dict where the key is 'header' and the value is a string
             containing the specified header and current time.
         """
-        header = "{} / {}".format(header, self.date) if header else self.date
+        if header:
+            if self.configs['append_date_to_header']:
+                header = "{} / {}".format(header, self.date)
+        else:
+            header = self.date
         logging.debug("Header defined as: {}".format(header))
         return {'header': header}
 
-    def note(self, date=None, comment=None, content=None, tags=None, url=None,
-             urls=None, header=None, **kwargs):
+    def note(self, date=None, comment=None, content=None, tags=None, urls=None,
+             header=None, **kwargs):
         """
         Build a note object.
 
         Returns:
             Returns a dict of the note.
         """
-        self.date = self.get_date()
+        self.date = date or self.get_date()
         note = {}
         comment = self.comment(comment)
         content = self.content(content)
         header = self.header(header)
-        #tags = {'tags': tags} if tags else self.tags()
         tags = self.tags(tags)
-        urls = {'urls': urls} if urls else self.urls()
+        urls = self.urls(urls)
+        #urls = {'urls': urls} if urls else self.urls()
         for element in [comment, content, header]:
             for value in element.values():
                 if value:
@@ -327,7 +331,7 @@ class NotesBase(object):
         if not self.dir_exists(notes_dir):
             msg = "Notes file's directory does not exist: {}".format(notes_dir)
             raise NotesErr(msg)
-        return notes_file        
+        return notes_file
 
     def prepend_data_to_file(self, filename, data):
         """
@@ -424,7 +428,7 @@ class NotesBase(object):
     def tags(self, tags=None):
         """
         Args:
-            *args: Pass in strings as tags.
+            tags: Pass in a list of tags.
 
         Returns:
             Returns a list of tags.
@@ -451,10 +455,12 @@ class NotesBase(object):
             raise NotesErr(msg)
 
     def take_note(self, notes_file, note, append=False, content_type=None,
-                  template_file=None):
+                  template_file=None, dryrun=False):
         """
         """
         markdown = self.create_markdown(template_file, note, content_type)
+        if dryrun:
+            return markdown
         if append:
             return self.write_data_to_file(notes_file, markdown)
         else:
@@ -464,7 +470,7 @@ class NotesBase(object):
         return None
 
     @staticmethod
-    def urls(*args):
+    def old_urls(*args):
         """
         Args:
             url (str): Note url.
@@ -476,6 +482,20 @@ class NotesBase(object):
         urls = []
         for arg in args:
             urls.append("[{}]({})".format(arg, arg))
+        logging.debug("URLs defined as: {}".format(urls))
+        return {'urls': urls}
+
+    @staticmethod
+    def urls(urls=None):
+        """
+        Args:
+            url (str): Note url.
+
+        Returns:
+            Returns a dict where the primary key is 'url' and the value is
+            url passed into the method.
+        """
+        urls = urls or []
         logging.debug("URLs defined as: {}".format(urls))
         return {'urls': urls}
 

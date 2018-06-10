@@ -1,2 +1,2 @@
 # mdnote
-Take a note using markdown!
+Take a note as markdown!

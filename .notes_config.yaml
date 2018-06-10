@@ -1,5 +1,6 @@
 auto_prepend_hashtag: False
 append_to_notes_file: False
+append_date_to_header: True
 default_content_type: text
 default_template_file: templates/note.md.j2
 notes_file: /home/krice/.mdnotes/notes.md
