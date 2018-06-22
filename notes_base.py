@@ -67,9 +67,10 @@ class NotesBase(object):
         logging.debug("Content type defined as: {}".format(content_type))
         return content_type
 
-    def create_markdown(self, template_file=None, note=None, content_type=None):
+    def render_note(self, template_file=None, note=None, content_type=None):
         """
-        Create markdown for note.
+        Using the specified template file interpolate the note dict and render
+        the template.
 
         Args:
             template_file (str): Path to Jinja2 template file.
@@ -78,7 +79,7 @@ class NotesBase(object):
                                 content.
 
         Returns:
-            Returns the call to self.render_template.
+            Returns the call to self.render_template as a string object.
         """
         content_type = self.content_type(content_type)
         note = note or self.note()
@@ -310,7 +311,6 @@ class NotesBase(object):
         header = self.header(header)
         tags = self.tags(tags)
         urls = self.urls(urls)
-        #urls = {'urls': urls} if urls else self.urls()
         for element in [comment, content, header]:
             for value in element.values():
                 if value:
@@ -326,7 +326,12 @@ class NotesBase(object):
         return note
 
     def notes_file(self, notes_file=None):
-        notes_file = notes_file or self.configs['notes_file']
+        if notes_file:
+            pass
+        elif 'notes_file' in self.configs.keys():
+            notes_file = self.configs['notes_file']
+        else:
+            raise NotesErr("Path to notes file not defined.")
         notes_dir = os.path.dirname(notes_file)
         if not self.dir_exists(notes_dir):
             msg = "Notes file's directory does not exist: {}".format(notes_dir)
@@ -445,6 +450,15 @@ class NotesBase(object):
 
     def template_file(self, template_file=None):
         """
+        Define the template file to be used.
+
+        Args:
+            template_file (str): Path to template file. If None then use the
+            config value 'default_template_file'.
+
+        Returns:
+            Returns the path to the template file as a string if the file
+            exists.
         """
         template_file = template_file or self.configs['default_template_file']
         logging.debug("Template file defined as: {}".format(template_file))
@@ -454,36 +468,21 @@ class NotesBase(object):
             msg = "Template file {} not found.".format(template_file)
             raise NotesErr(msg)
 
-    def take_note(self, notes_file, note, append=False, content_type=None,
+    def take_note(self, note, notes_file=None, append=False, content_type=None,
                   template_file=None, dryrun=False):
         """
         """
-        markdown = self.create_markdown(template_file, note, content_type)
+        notes_file = notes_file or self.notes_file(notes_file)
+        rendered_note = self.render_note(template_file, note, content_type)
         if dryrun:
-            return markdown
+            return rendered_note
         if append:
-            return self.write_data_to_file(notes_file, markdown)
+            return self.write_data_to_file(notes_file, rendered_note)
         else:
-            return self.prepend_data_to_file(notes_file, markdown)
+            return self.prepend_data_to_file(notes_file, rendered_note)
         msg = "Failed to write note {} to: {}".format(note, notes_file)
         logging.error(msg)
         return None
-
-    @staticmethod
-    def old_urls(*args):
-        """
-        Args:
-            url (str): Note url.
-
-        Returns:
-            Returns a dict where the primary key is 'url' and the value is
-            url passed into the method.
-        """
-        urls = []
-        for arg in args:
-            urls.append("[{}]({})".format(arg, arg))
-        logging.debug("URLs defined as: {}".format(urls))
-        return {'urls': urls}
 
     @staticmethod
     def urls(urls=None):

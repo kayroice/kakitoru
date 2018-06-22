@@ -1,5 +1,17 @@
+# Automatically prepend a '#' to tags, a value of False disables this action.
 auto_prepend_hashtag: False
+# Append notes to the notes file, a value of False will prepend data to the
+# beginning of the file.
 append_to_notes_file: False
+# If set to True then the header will automatically have the current data
+# appended to it.
 append_date_to_header: True
+# The language identifier of the markdown code block that contains the content
+# of the note.
+# https://help.github.com/articles/creating-and-highlighting-code-blocks
 default_content_type: text
+# Set the path to the notes file to use. If set then obviates the need to
+# specify the path to the notes file on the command line. 
+default_notes_file: /tmp/test.md
+# If not template file is specified then default to the specified file.
 default_template_file: templates/notes.md.j2

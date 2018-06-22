@@ -26,7 +26,8 @@ def create_mode(args, logger, nb):
     else:
         content = nb.get_input()
     note = nb.note(date=args.date, comment=args.comment, content=content,
-                   header=args.header, tags=args.tags, urls=args.urls)
+                   header=args.header, tags=args.tags, urls=args.urls,
+                   **get_cli_key_value_pairs(args))
     notes_file = nb.take_note(notes_file=args.file, note=note,
                               append=args.append, content_type=args.contenttype,
                               template_file=args.templatefile,
@@ -37,6 +38,13 @@ def create_mode(args, logger, nb):
         return 0
     print("Failed to write note to: {}".format(notes_file))
     return 1
+
+def get_cli_key_value_pairs(args):
+    kvpairs = {}
+    if args.keyvalue:
+        for element in args.keyvalue:
+            kvpairs.update(dict(element.split(':') for kv in element))
+    return kvpairs
 
 def option_parser():
     """
@@ -74,6 +82,8 @@ def option_parser():
     # create mode
     parser_create = subparsers.add_parser('create')
 
+    kvmsg = "Key-value pairs in the format 'key:value', separated by a space."
+
     optmsgs.update({
         'append': 'If specified appends to notes file instead of prepending.',
         'autohashtag': "Automatically prepends a '#' to tags.",
@@ -82,6 +92,7 @@ def option_parser():
         'date': 'Date of the note, defaults to current date-time.',
         'dryrun': 'Print the note to stdout, bypasses writing to note file.',
         'header': "Name of entry's header, defaults to current date-time.",
+        'keyvalue': kvmsg,
         'nodateinheader': 'Do not append the date to the header.',
         'noprompt': 'Do not prompt the user for input.',
         'tags': 'Add space separated tags to note.',
@@ -101,6 +112,8 @@ def option_parser():
     parser_create.add_argument('-dr', '--dryrun', help=optmsgs['dryrun'],
                                action=st)
     parser_create.add_argument('--header', default=None, help=optmsgs['header'])
+    parser_create.add_argument('-kv', '--keyvalue', nargs='+',
+                               help=optmsgs['header'])
     parser_create.add_argument('-n', '--noprompt', help=optmsgs['noprompt'],
                                action=st)
     parser_create.add_argument('-nd', '--nodateinheader',
