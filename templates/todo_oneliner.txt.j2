@@ -1,0 +1,14 @@
+{%- set date = note['date'] -%}
+{%- if note['due'] -%}
+{%-   set due = 'due:' + note['due'] -%}
+{%- endif -%}
+{%- if note['comment'] -%}
+{%-   set comment = 'comment:' + note['comment'] -%}
+{%- endif -%}
+{%- if note['content'] -%}
+{%-   set content = note['content'] -%}
+{%- endif -%}
+{%- if note['tags'] -%}
+{%    set tags = note['tags']|join(' ') -%}
+{%- endif -%}
+- created:{{ date }} {{ comment }} {{ content }} {{ tags }} {{ due }}

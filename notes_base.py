@@ -305,7 +305,7 @@ class NotesBase(object):
             Returns a dict of the note.
         """
         self.date = date or self.get_date()
-        note = {}
+        note = {'date': self.date}
         comment = self.comment(comment)
         content = self.content(content)
         header = self.header(header)
@@ -326,16 +326,32 @@ class NotesBase(object):
         return note
 
     def notes_file(self, notes_file=None):
+        """
+        Define the name of the notes file.
+
+        Args:
+            notes_file (str): The name of the notes file. If not defined then
+                              attempt to use the value of 'default_notes_file'
+                              from the configs.
+
+        Returns:
+            Returns the name of the notes file as a string.
+        """
         if notes_file:
             pass
-        elif 'notes_file' in self.configs.keys():
-            notes_file = self.configs['notes_file']
+        elif 'default_notes_file' in self.configs.keys():
+            notes_file = self.configs['default_notes_file']
+            msg = "Using default notes file definition: {}".format(notes_file)
+            logging.debug(msg)
         else:
             raise NotesErr("Path to notes file not defined.")
+        logging.debug("Notes file defined as: {}".format(notes_file))
         notes_dir = os.path.dirname(notes_file)
         if not self.dir_exists(notes_dir):
             msg = "Notes file's directory does not exist: {}".format(notes_dir)
             raise NotesErr(msg)
+        if not os.path.exists(notes_file):
+            logging.warn("Notes file does not exist: {}".format(notes_file))
         return notes_file
 
     def prepend_data_to_file(self, filename, data):
@@ -472,7 +488,7 @@ class NotesBase(object):
                   template_file=None, dryrun=False):
         """
         """
-        notes_file = notes_file or self.notes_file(notes_file)
+        notes_file = self.notes_file(notes_file)
         rendered_note = self.render_note(template_file, note, content_type)
         if dryrun:
             return rendered_note

@@ -157,7 +157,8 @@ def main():
     args = option_parser()
     nb = notes_base.NotesBase(config_file=args.config,
                               content_type=args.contenttype,
-                              append_date_to_header=(not args.nodateinheader))
+                              append_date_to_header=(not args.nodateinheader),
+                              auto_prepend_hashtag=args.autohashtag)
     set_logging(args)
 
     if args.mode == 'create':

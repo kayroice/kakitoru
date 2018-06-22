@@ -12,6 +12,7 @@ append_date_to_header: True
 default_content_type: text
 # Set the path to the notes file to use. If set then obviates the need to
 # specify the path to the notes file on the command line. 
-default_notes_file: /tmp/test.md
+#default_notes_file: False
+default_notes_file: /tmp/test.txt
 # If not template file is specified then default to the specified file.
 default_template_file: templates/notes.md.j2
