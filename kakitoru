@@ -11,12 +11,6 @@ import sys
 import notes_base
 
 
-def query_mode(args, logger, nb):
-    """
-    Define query mode here.
-    """
-    pass
-
 def create_mode(args, logger, nb):
     """
     Pass in cmdline args for create mode.
@@ -38,6 +32,12 @@ def create_mode(args, logger, nb):
         return 0
     print("Failed to write note to: {}".format(notes_file))
     return 1
+
+def edit_mode(args, logger, nb):
+    """
+    Define edit mode here.
+    """
+    pass
 
 def get_cli_key_value_pairs(args):
     kvpairs = {}
@@ -123,6 +123,14 @@ def option_parser():
                                help=optmsgs['templatefile'])
     parser_create.add_argument('-u', '--urls', nargs='+', help=optmsgs['urls'])
 
+    # edit mode
+    parser_edit = subparsers.add_parser('edit')
+
+    optmsgs.update({
+        'editor': 'Path to editor.'
+    })
+    parser_edit.add_argument('-d', '--editor', help=optmsgs['editor'])
+
     # query mode
     parser_query = subparsers.add_parser('query')
 
@@ -135,6 +143,12 @@ def option_parser():
 
     return parser.parse_args()
 
+
+def query_mode(args, logger, nb):
+    """
+    Define query mode here.
+    """
+    pass
 
 def set_logging(args):
     """
